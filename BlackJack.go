@@ -35,10 +35,13 @@ type Carta struct {
 func jogo(cartas [13]Carta){
   var resposta string
 
-  naipe := entregarNaipe(cartas)
-  carta := entregarCarta(cartas)
+  naipePC, cartaPC := cartasDealer(cartas)
+  pontosPC := cartaPC.Pontos
+  fmt.Printf("A carta do dealer é %s %s\n E sua pontuação atual é %d\n", cartaPC.Nome, naipePC.Naipe, pontosPC)
+
+  naipe, carta := cartasJogador(cartas)
   pontos := carta.Pontos
-  fmt.Printf("A carta sorteada é %s %s\nSua pontuação atual é %d\n", carta.Nome, naipe.Naipe, pontos)
+  fmt.Printf("\nA sua carta sorteada é %s %s\nSua pontuação atual é %d\n", carta.Nome, naipe.Naipe, pontos)
 
   for pontos <= 21 {
     fmt.Printf("Você gostaria de mais uma carta? \n")
@@ -46,18 +49,15 @@ func jogo(cartas [13]Carta){
     respVerificada := simOuNao(resposta)
 
     if respVerificada{
-      naipe = entregarNaipe(cartas)
-      carta = entregarCarta(cartas)
+      naipePC, cartaPC = cartasDealer(cartas)
+      pontosPC = pontosPC + cartaPC.Pontos
+
+      naipe, carta = cartasJogador(cartas)
       pontos = pontos + carta.Pontos
-      if pontos > 21{
-        fmt.Printf("A carta sorteada é %s %s sua pontuação foi %d\n      Game Over\n", carta.Nome, naipe.Naipe, pontos)
-        os.Exit(0)
-      } else if pontos == 21{
-        fmt.Printf("A carta sorteada é %s %s sua pontuação foi %d\nParabéns!\n      Game Over\n", carta.Nome, naipe.Naipe, pontos)
-        os.Exit(0)
-      }
-      fmt.Printf("A carta sorteada é %s %s\nSua pontuação atual é %d\n", carta.Nome, naipe.Naipe, pontos)
+
+      verificacaoJogador(naipe, carta, naipePC, cartaPC, pontos, pontosPC)
     } else{
+      fmt.Printf("O dealer terminou com %d pontos\n", pontosPC)
       fmt.Printf("Sua pontuação foi %d\nObrigado por jogar!\n", pontos)
       os.Exit(0)
     }
@@ -108,6 +108,34 @@ func gerarCartas ()(cartas [13]Carta){
   cartas[12].Nome = "As"
   cartas[12].Pontos = 1
 
+  return
+}
+
+func verificacaoJogador(naipe Carta, carta Carta, naipePC Carta, cartaPC Carta, pontos int32, pontosPC int32){
+  if pontos > 21 && pontosPC < 21{
+    fmt.Printf("A carta sorteada é %s %s sua pontuação foi %d\n      Game Over\n", carta.Nome, naipe.Naipe, pontos)
+    fmt.Printf("A carta do dealer é %s %s, ele venceu com %d pontos!\n      Game Over\n", cartaPC.Nome, naipePC.Naipe, pontosPC)
+    os.Exit(0)
+  } else if pontos == 21{
+    fmt.Printf("A carta sorteada é %s %s sua pontuação foi %d\n", carta.Nome, naipe.Naipe, pontos)
+    fmt.Printf("A carta do dealer é %s %s, ele perdeu com %d pontos\nParabéns!\n      Game Over\n", cartaPC.Nome, naipePC.Naipe, pontosPC)
+    os.Exit(0)
+  } else {
+  fmt.Printf("A carta do dealer é %s %s\n E sua pontuação atual é %d\n", cartaPC.Nome, naipePC.Naipe, pontosPC)
+  fmt.Printf("\nA sua carta sorteada é %s %s\nSua pontuação atual é %d\n", carta.Nome, naipe.Naipe, pontos)
+  }
+  return
+}
+
+func cartasDealer (cartas [13]Carta) (naipe Carta, carta Carta){
+  naipe = entregarNaipe(cartas)
+  carta = entregarCarta(cartas)
+  return
+}
+
+func cartasJogador (cartas [13]Carta) (naipe Carta, carta Carta){
+  naipe = entregarNaipe(cartas)
+  carta = entregarCarta(cartas)
   return
 }
 

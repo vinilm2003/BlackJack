@@ -2,12 +2,9 @@ package main
 
 import (
   "fmt"
-  // "math"
   "strings"
-  // "os"
   "math/rand"
    "time"
-   "strconv"
 )
 
 type Carta struct {
@@ -16,21 +13,18 @@ type Carta struct {
   Pontos int32
 }
 
-var cartasUtilizadas []string
+var cartasUtilizadas = []int32{-1}
 
 func main() {
-
   var carta Carta
-  testejogo := true
   var verif string
+  testejogo := true
 
   for testejogo {
-    if testejogo {
-      carta = gerarCarta()
-      fmt.Printf("carta %s de %s, %d pontos\n", carta.Nome, carta.Naipe, carta.Pontos)
-      fmt.Scanln(&verif)
-      testejogo = strings.Contains(verif, "s")
-    }
+    carta = gerarCarta()
+    fmt.Printf("carta %s de %s, %d pontos\n", carta.Nome, carta.Naipe, carta.Pontos)
+    fmt.Scanln(&verif)
+    testejogo = strings.Contains(verif, "")
   }
 }
 
@@ -43,60 +37,32 @@ func gerarRandom()(random int32){
   return
 }
 
-func verificarGeracao(numeroDaCarta int32)(utilizacao bool){
-
-  numString := strconv.Itoa(int(numeroDaCarta))
-
-  for _, v := range cartasUtilizadas {
-    jaUtilizado := strings.Contains(v, numString)
-
-    if jaUtilizado {
-      utilizacao = false
-    } else {
-      utilizacao = true
-      cartasUtilizadas = append(cartasUtilizadas, numString)
-      fmt.Println(cartasUtilizadas)
-    }
-  }
-  return
-}
-
 func gerarCarta()(carta Carta){
   var nome = [13]string{"Dois", "Três", "Quatro", "Cinco", "Seis", "Sete", "Oito", "Nove", "Dez", "Valete", "Rainha", "Rei", "As"}
   var naipe = [4]string{"Ouros", "Copas", "Espadas", "Paus"}
   var pontos = [13]int32{2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 1}
+  var num int32
+  utilizada := true
 
-  num := gerarRandom()
-
-  utilizacao := verificarGeracao(num)
-  if utilizacao {
-    numCarta := num % 13
-    numPontos := num % 13
-    numNaipe := num % 4
-
-    carta.Nome = nome[numCarta]
-    carta.Naipe = naipe[numNaipe]
-    carta.Pontos = pontos[numPontos]
-
-  } else {
+  for utilizada {
     num = gerarRandom()
+    for _, v := range cartasUtilizadas {
+      utilizada = v == num
+      if utilizada {
+        break
+      }
+    }
   }
 
-  var primeiraCcarta = true
+  cartasUtilizadas = append(cartasUtilizadas, num)
 
-  if primeiraCcarta {
-    num = gerarRandom()
+  numCarta := num % 13
+  numPontos := num % 13
+  numNaipe := num % 4
 
-    numCarta := num % 13
-    numPontos := num % 13
-    numNaipe := num % 4
-
-    carta.Nome = nome[numCarta]
-    carta.Naipe = naipe[numNaipe]
-    carta.Pontos = pontos[numPontos]
-
-    primeiraCcarta = false
-  }
+  carta.Nome = nome[numCarta]
+  carta.Naipe = naipe[numNaipe]
+  carta.Pontos = pontos[numPontos]
 
 return
 }

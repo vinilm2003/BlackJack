@@ -8,6 +8,8 @@ import (
   "time"
 )
 
+var cartasUtilizadas = []int32{-1}
+
 func main() {
   var resposta string
   var jogar bool
@@ -35,11 +37,11 @@ func jogo(){
 
   cartaPC := gerarCarta()
   pontosPC := cartaPC.Pontos
-  fmt.Printf("A carta do dealer é %s %s\n E sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
+  fmt.Printf("A carta do dealer é %s de %s\n E sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
 
   cartaJ := gerarCarta()
   pontosJ := cartaJ.Pontos
-  fmt.Printf("\nA sua carta sorteada é %s %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+  fmt.Printf("\nA sua carta sorteada é %s de %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
 
   for pontosJ <= 21 {
     fmt.Printf("Você gostaria de mais uma carta? \n")
@@ -63,25 +65,26 @@ func jogo(){
 }
 
 func verificacaoJogador(cartaJ Carta, cartaPC Carta, pontosJ int32, pontosPC int32){
+
   if pontosJ > 21 && pontosPC < 21{
-    fmt.Printf("A carta sorteada é %s %s sua pontuação foi %d\n      Game Over\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
-    fmt.Printf("A carta do dealer é %s %s, ele venceu com %d pontos!\n      Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
+    fmt.Printf("A carta sorteada é %s de %s sua pontuação foi %d\n      Game Over\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+    fmt.Printf("A carta do dealer é %s de %s, ele venceu com %d pontos!\n      Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
     os.Exit(0)
   } else if pontosJ == 21{
-    fmt.Printf("A carta sorteada é %s %s sua pontuação foi %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
-    fmt.Printf("A carta do dealer é %s %s, ele perdeu com %d pontos\nParabéns!\n      Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
+    fmt.Printf("A carta sorteada é %s de %s sua pontuação foi %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+    fmt.Printf("A carta do dealer é %s de %s, ele perdeu com %d pontos\nParabéns!\n      Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
     os.Exit(0)
   } else if pontosPC == 21{
-    fmt.Printf("A carta sorteada é %s %s sua pontuação foi %d\n      Game Over\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
-    fmt.Printf("A carta do dealer é %s %s, ele venceu com %d pontos!\n      Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
+    fmt.Printf("A carta sorteada é %s de %s sua pontuação foi %d\n      Game Over\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+    fmt.Printf("A carta do dealer é %s de %s, ele venceu com %d pontos!\n      Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
     os.Exit(0)
   } else if pontosPC > 21 && pontosJ < 21{
-    fmt.Printf("A carta sorteada é %s %s sua pontuação foi %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
-    fmt.Printf("A carta do dealer é %s %s, ele perdeu com %d pontos\nParabéns!\n      Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
+    fmt.Printf("A carta sorteada é %s de %s sua pontuação foi %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+    fmt.Printf("A carta do dealer é %s de %s, ele perdeu com %d pontos\nParabéns!\n      Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
     os.Exit(0)
   } else {
-  fmt.Printf("A carta do dealer é %s %s\n E sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
-  fmt.Printf("\nA sua carta sorteada é %s %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+  fmt.Printf("A carta do dealer é %s de %s\n E sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
+  fmt.Printf("\nA sua carta sorteada é %s de %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
   }
   return
 }
@@ -102,8 +105,21 @@ func gerarCarta()(carta Carta){
   var nome = [13]string{"Dois", "Três", "Quatro", "Cinco", "Seis", "Sete", "Oito", "Nove", "Dez", "Valete", "Rainha", "Rei", "As"}
   var naipe = [4]string{"Ouros", "Copas", "Espadas", "Paus"}
   var pontos = [13]int32{2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 1}
+  var num int32
+  utilizada := true
 
-  num := gerarRandom()
+  for utilizada {
+    num = gerarRandom()
+    for _, v := range cartasUtilizadas {
+      utilizada = v == num
+      if utilizada {
+        break
+      }
+    }
+  }
+
+  cartasUtilizadas = append(cartasUtilizadas, num)
+
   numCarta := num % 13
   numPontos := num % 13
   numNaipe := num % 4

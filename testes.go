@@ -26,7 +26,7 @@ func main() {
   }
 }
 
-type Carta struct {
+type CartaType struct {
   Nome string
   Naipe string
   Pontos int32
@@ -53,19 +53,11 @@ func jogo(){
       respVerificada = simOuNao(resposta)
     }
 
-    if pontosPC < 20 && dealerContinua{
-      cartaPC = gerarCarta()
-      pontosPC = pontosPC + cartaPC.Pontos
-      dealerContinua = true
-
-    } else if pontosPC >= 20 && dealerContinua{
-      fmt.Printf("O dealer terminou com %d pontos\n", pontosPC)
-      dealerContinua = false
-    }
 
     if respVerificada && jogadorContinua{
       cartaJ = gerarCarta()
       pontosJ = pontosJ + cartaJ.Pontos
+      fmt.Printf("\nA sua carta sorteada é %s de %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
 
     } else if !respVerificada && jogadorContinua{
       jogadorContinua = false
@@ -73,14 +65,20 @@ func jogo(){
       fmt.Printf("Sua pontuação é %d\n", pontosJ)
     }
 
-    if !dealerContinua && !jogadorContinua {
-      os.Exit(0)
+    if pontosPC >= 19 && pontosJ < pontosPC && dealerContinua{
+      fmt.Printf("O dealer terminou com %d pontos\n", pontosPC)
+      dealerContinua = false
+
+    } else if pontosPC <= 19 && dealerContinua{
+      cartaPC = gerarCarta()
+      pontosPC = pontosPC + cartaPC.Pontos
+      fmt.Printf("\nA carta do dealer é %s de %s\nE sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
     }
     verificarPontuacao(cartaJ, cartaPC, pontosJ, pontosPC, jogadorContinua, dealerContinua)
   }
 }
 
-func verificarPontuacao(cartaJ Carta, cartaPC Carta, pontosJ int32, pontosPC int32, jogadorContinua bool, dealerContinua bool){
+func verificarPontuacao(cartaJ CartaType, cartaPC CartaType, pontosJ int32, pontosPC int32, jogadorContinua bool, dealerContinua bool){
 
   if pontosJ > 21 && pontosPC < 21{
     fmt.Printf("\nA carta sorteada é %s de %s sua pontuação foi %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
@@ -98,12 +96,17 @@ func verificarPontuacao(cartaJ Carta, cartaPC Carta, pontosJ int32, pontosPC int
     fmt.Printf("\nA carta sorteada é %s de %s sua pontuação foi %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
     fmt.Printf("A carta do dealer é %s de %s, ele perdeu com %d pontos\nVocê ganhou, parabéns!\n  Game Over\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
     os.Exit(0)
-  }
-  if dealerContinua{
-    fmt.Printf("\nA carta do dealer é %s de %s\nE sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
-  }
-  if jogadorContinua{
-    fmt.Printf("\nA sua carta sorteada é %s de %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+  } else if !dealerContinua && !jogadorContinua {
+      if pontosJ > pontosPC {
+        fmt.Printf("\nVocê venceu com %d Pontos!\nParabéns!\n      Game Over\n", pontosJ)
+        os.Exit(0)
+      } else if pontosJ < pontosPC {
+        fmt.Printf("\nO dealer venceu com %d Pontos!\n      Game Over\n", pontosPC)
+        os.Exit(0)
+      } else {
+        fmt.Printf("\nHouve um empate!\n Dealer:%d\n Você:%d\n      Game Over\n", pontosPC, pontosJ)
+        os.Exit(0)
+      }
   }
   return
 }
@@ -120,7 +123,7 @@ func simOuNao(resp string)(sim bool){
   return
 }
 
-func gerarCarta()(carta Carta){
+func gerarCarta()(carta CartaType){
   var nome = [13]string{"Dois", "Três", "Quatro", "Cinco", "Seis", "Sete", "Oito", "Nove", "Dez", "Valete", "Rainha", "Rei", "As"}
   var naipe = [4]string{"Ouros", "Copas", "Espadas", "Paus"}
   var pontos = [13]int32{2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 1}

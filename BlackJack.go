@@ -9,6 +9,9 @@ import (
 )
 
 var cartasUtilizadas = []int32{-1}
+var pontosJ, pontosPC int32
+var cartaJ, cartaPC CartaType
+var respVerificada, jogadorContinua, dealerContinua bool
 
 func main() {
   var resposta string
@@ -34,17 +37,12 @@ type CartaType struct {
 
 func jogo(){
   var resposta string
-  var respVerificada bool
-  jogadorContinua := true
-  dealerContinua := true
+  iniciante := gerarRandom(2)
+  jogadorContinua = true
+  dealerContinua = true
 
-  cartaPC := gerarCarta()
-  pontosPC := cartaPC.Pontos
-  fmt.Printf("A carta do dealer é %s de %s\n E sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
-
-  cartaJ := gerarCarta()
-  pontosJ := cartaJ.Pontos
-  fmt.Printf("\nA sua carta sorteada é %s de %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+  cartaJogador(); cartaJogador()
+  cartaDealer(); cartaDealer()
 
   for pontosJ <= 21 {
     if jogadorContinua {
@@ -52,27 +50,10 @@ func jogo(){
       fmt.Scanln(&resposta)
       respVerificada = simOuNao(resposta)
     }
-
-
-    if respVerificada && jogadorContinua{
-      cartaJ = gerarCarta()
-      pontosJ = pontosJ + cartaJ.Pontos
-      fmt.Printf("\nA sua carta sorteada é %s de %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
-
-    } else if !respVerificada && jogadorContinua{
-      jogadorContinua = false
-      respVerificada = false
-      fmt.Printf("Sua pontuação é %d\n", pontosJ)
-    }
-
-    if pontosPC >= 19 && pontosJ < pontosPC && dealerContinua{
-      fmt.Printf("O dealer terminou com %d pontos\n", pontosPC)
-      dealerContinua = false
-
-    } else if pontosPC <= 19 && dealerContinua{
-      cartaPC = gerarCarta()
-      pontosPC = pontosPC + cartaPC.Pontos
-      fmt.Printf("\nA carta do dealer é %s de %s\nE sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
+    if iniciante == 0 {
+      jogadorInicia()
+    } else if iniciante == 1 {
+      dealerInicia()
     }
     verificarPontuacao(cartaJ, cartaPC, pontosJ, pontosPC, jogadorContinua, dealerContinua)
   }
@@ -108,7 +89,6 @@ func verificarPontuacao(cartaJ CartaType, cartaPC CartaType, pontosJ int32, pont
         os.Exit(0)
       }
   }
-  return
 }
 
 func simOuNao(resp string)(sim bool){
@@ -123,6 +103,55 @@ func simOuNao(resp string)(sim bool){
   return
 }
 
+func jogadorInicia (){
+  if respVerificada && jogadorContinua{
+    cartaJogador()
+
+  } else if !respVerificada && jogadorContinua{
+    jogadorContinua = false
+    respVerificada = false
+    fmt.Printf("Sua pontuação é %d\n", pontosJ)
+  }
+
+  if pontosPC >= 19 && pontosJ < pontosPC && dealerContinua{
+    fmt.Printf("O dealer terminou com %d pontos\n", pontosPC)
+    dealerContinua = false
+
+  } else if pontosPC <= 19 && dealerContinua{
+    cartaDealer()
+  }
+}
+
+func dealerInicia(){
+  if pontosPC >= 19 && pontosJ < pontosPC && dealerContinua{
+    fmt.Printf("O dealer terminou com %d pontos\n", pontosPC)
+    dealerContinua = false
+
+  } else if pontosPC <= 19 && dealerContinua{
+    cartaDealer()
+  }
+  if respVerificada && jogadorContinua{
+    cartaJogador()
+
+  } else if !respVerificada && jogadorContinua{
+    jogadorContinua = false
+    respVerificada = false
+    fmt.Printf("Sua pontuação é %d\n", pontosJ)
+  }
+}
+
+func cartaJogador(){
+  cartaJ = gerarCarta()
+  pontosJ = pontosJ + cartaJ.Pontos
+  fmt.Printf("\nA sua carta sorteada é %s de %s\nSua pontuação atual é %d\n", cartaJ.Nome, cartaJ.Naipe, pontosJ)
+}
+
+func cartaDealer(){
+  cartaPC = gerarCarta()
+  pontosPC = pontosPC + cartaPC.Pontos
+  fmt.Printf("\nA carta do dealer é %s de %s\n E sua pontuação atual é %d\n", cartaPC.Nome, cartaPC.Naipe, pontosPC)
+}
+
 func gerarCarta()(carta CartaType){
   var nome = [13]string{"Dois", "Três", "Quatro", "Cinco", "Seis", "Sete", "Oito", "Nove", "Dez", "Valete", "Rainha", "Rei", "As"}
   var naipe = [4]string{"Ouros", "Copas", "Espadas", "Paus"}
@@ -131,7 +160,7 @@ func gerarCarta()(carta CartaType){
   utilizada := true
 
   for utilizada {
-    num = gerarRandom()
+    num = gerarRandom(52)
     for _, v := range cartasUtilizadas {
       utilizada = v == num
       if utilizada {
@@ -153,11 +182,11 @@ func gerarCarta()(carta CartaType){
 return
 }
 
-func gerarRandom()(random int32){
+func gerarRandom(num int32)(random int32){
   tempo := time.Now()
   nanosecond := tempo.Nanosecond()
   rand.Seed(int64(nanosecond))
-  random = rand.Int31n(52)
+  random = rand.Int31n(num)
 
   return
 }
